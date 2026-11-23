@@ -1,0 +1,5 @@
+.env
+.env.*
+bank-management
+*.log
+.DS_Store

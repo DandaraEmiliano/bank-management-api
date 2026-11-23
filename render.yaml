@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: bank-management-api
+    runtime: docker
+    plan: free
+    region: ohio
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bank-management-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "1"
+
+databases:
+  - name: bank-management-db
+    plan: free
+    region: ohio
+    postgresMajorVersion: "17"
+    ipAllowList: []

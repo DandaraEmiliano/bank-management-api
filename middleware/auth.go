@@ -8,29 +8,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+const CookieName = "bank_session"
+
+func AuthMiddleware(tokens utils.Tokens) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "token missing"})
-			c.Abort()
-			return
+		var raw string
+		if header := c.GetHeader("Authorization"); header != "" {
+			raw, _ = strings.CutPrefix(header, "Bearer ")
+		} else {
+			raw, _ = c.Cookie(CookieName)
 		}
-
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token format"})
-			c.Abort()
-			return
-		}
-
-		claims, err := utils.ValidateToken(tokenString)
+		claims, err := tokens.Validate(raw)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Sessão inválida ou expirada."})
 			return
 		}
-
 		c.Set("userID", claims.UserID)
 		c.Next()
 	}
