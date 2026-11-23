@@ -1,15 +1,13 @@
-# Choose the base image
-FROM golang:1.20-alpine
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the code to the container
+FROM golang:1.26.11-alpine AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /bank-management .
 
-# Download dependencies and compile
-RUN go mod tidy
-RUN go build -o main .
-
-# Define the input command
-CMD ["./main"]
+FROM alpine:3.23
+RUN apk add --no-cache ca-certificates
+COPY --from=build /bank-management /usr/local/bin/bank-management
+USER 65532:65532
+EXPOSE 8080
+ENTRYPOINT ["bank-management"]

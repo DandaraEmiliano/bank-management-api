@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172843">
+  <meta name="description" content="Organize contas internas e acompanhe entradas, saídas e transferências em um extrato.">
+  <title>Caixa Interno · Contas e extrato</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell top-content">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span> Caixa Interno</a>
+      <div class="session" id="session" hidden><span id="session-name"></span><button class="button secondary" id="logout" type="button">Sair</button></div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div><h1>Controle de caixa</h1><p>Organize contas, registre lançamentos e acompanhe o saldo de cada uma.</p></div>
+      <div class="hero-total" id="hero-total" hidden><span>Saldo consolidado</span><strong id="total">R$ 0,00</strong></div>
+    </section>
+
+    <section class="panel access" id="access" aria-labelledby="access-title" hidden>
+      <div class="panel-head"><h2 id="access-title">Entrar</h2><button class="button subtle" type="button" id="switch-access">Criar acesso</button></div>
+      <form id="access-form">
+        <label id="name-label" hidden>Nome<input id="name" maxlength="80" autocomplete="name"></label>
+        <label>E-mail<input id="email" type="email" maxlength="254" autocomplete="email" required></label>
+        <label>Senha<input id="password" type="password" autocomplete="current-password" maxlength="72" required></label>
+        <button class="button primary" type="submit" id="access-action">Entrar</button>
+      </form>
+      <p class="notice" id="access-notice" role="status"></p>
+    </section>
+    <p class="notice" id="boot-notice" role="status">Carregando…</p>
+    <section id="dashboard" hidden aria-label="Painel de caixa">
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-head"><h2>Contas internas</h2><span class="muted" id="account-count"></span></div>
+          <ul class="accounts" id="accounts"></ul>
+          <p class="muted" id="empty-accounts">Crie a primeira conta para começar.</p>
+          <details id="account-details">
+            <summary>Nova conta</summary>
+            <form id="account-form" class="compact-form">
+              <label>Nome da conta<input name="name" maxlength="80" placeholder="Ex.: Caixa geral" required></label>
+              <label>Saldo inicial (R$)<input name="balance" type="number" inputmode="decimal" min="0" max="90000000000" step="0.01" placeholder="0,00"></label>
+              <button class="button primary" type="submit">Criar conta</button>
+            </form>
+          </details>
+          <p class="notice" id="account-notice" role="status"></p>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Novo lançamento</h2></div>
+          <form id="movement-form" class="compact-form">
+            <fieldset id="movement-fields">
+              <label>Tipo
+                <select id="kind"><option value="transfer">Transferência interna</option><option value="credit">Entrada</option><option value="debit">Saída</option></select>
+              </label>
+              <div class="field-row">
+                <label id="from-label">Conta de origem<select id="from"></select></label>
+                <label id="to-label">Conta de destino<select id="to"></select></label>
+              </div>
+              <label>Valor (R$)<input id="amount" type="number" inputmode="decimal" min="0.01" max="90000000000" step="0.01" placeholder="0,00" required></label>
+              <label>Descrição<input id="description" maxlength="160" placeholder="Ex.: Reserva para fornecedores"></label>
+              <button class="button primary" type="submit" id="movement-action">Registrar lançamento</button>
+            </fieldset>
+          </form>
+          <p class="notice" id="movement-notice" role="status"></p>
+        </section>
+      </div>
+      <section class="panel ledger">
+        <div class="panel-head"><div><h2>Extrato</h2><p class="muted">Últimos 100 lançamentos</p></div></div>
+        <p class="muted" id="empty-ledger">Os lançamentos aparecem aqui.</p>
+        <div class="table-wrap" id="table-wrap" hidden tabindex="0" aria-label="Tabela de lançamentos">
+          <table role="table" aria-label="Lançamentos recentes">
+            <thead><tr><th scope="col">Lançamento</th><th scope="col">Contas</th><th scope="col">Data</th><th scope="col">Valor</th></tr></thead>
+            <tbody id="movements" role="rowgroup"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+  <footer class="shell footer"><span>Controle de contas internas</span><a href="https://github.com/DandaraEmiliano/bank-management-api">Código e arquitetura</a></footer>
+</body>
+</html>
