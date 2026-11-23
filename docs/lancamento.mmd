@@ -1,0 +1,13 @@
+flowchart TD
+    A[Operador envia o lançamento] --> B{Sessão válida?}
+    B -->|Não| C[HTTP 401]
+    B -->|Sim| D[Validar tipo, contas e valor]
+    D --> E[Iniciar transação e bloquear operador]
+    E --> F{Já existe lançamento com a chave?}
+    F -->|Mesmo conteúdo| G[Retornar lançamento original]
+    F -->|Conteúdo diferente| H[HTTP 409]
+    F -->|Primeiro envio| I{Contas do operador e saldo suficiente?}
+    I -->|Não| J[Reverter transação]
+    I -->|Sim| K[Atualizar saldos e gravar extrato]
+    K --> L[Confirmar transação]
+    L --> M[Painel recarrega saldos e extrato]

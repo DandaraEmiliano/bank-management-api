@@ -1,0 +1,7 @@
+flowchart TD
+    A[Painel autenticado] --> B[GET /auth/overview]
+    B --> C[Iniciar transação de leitura Repeatable Read]
+    C --> D[Consultar contas do usuário]
+    D --> E[Consultar os últimos 100 lançamentos]
+    E --> F[Responder com o mesmo snapshot]
+    F --> G[Renderizar saldos e extrato]

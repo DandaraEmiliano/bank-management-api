@@ -2,6 +2,10 @@
 
 Aplicação web para organizar contas internas, registrar entradas e saídas e transferir saldos entre contas. O painel mostra o saldo consolidado e o extrato de lançamentos de cada usuário. O sistema mantém registros de caixa e opera sem integração bancária.
 
+[**Abrir o Caixa Interno**](https://bank-management-api-wy58.onrender.com/)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/DandaraEmiliano/bank-management-api)
+
 ![Painel de caixa com saldo consolidado, contas internas e extrato](docs/painel.png)
 
 ## Experimente
@@ -19,21 +23,9 @@ O backend em Go usa Gin para servir o painel e a API na mesma origem. O PostgreS
 
 ### Fluxograma do lançamento
 
-```mermaid
-flowchart TD
-    A[Operador envia o lançamento] --> B{Sessão válida?}
-    B -->|Não| C[HTTP 401]
-    B -->|Sim| D[Validar tipo, contas e valor]
-    D --> E[Iniciar transação e bloquear operador]
-    E --> F{Já existe lançamento com a chave?}
-    F -->|Mesmo conteúdo| G[Retornar lançamento original]
-    F -->|Conteúdo diferente| H[HTTP 409]
-    F -->|Primeiro envio| I{Contas do operador e saldo suficiente?}
-    I -->|Não| J[Reverter transação]
-    I -->|Sim| K[Atualizar saldos e gravar extrato]
-    K --> L[Confirmar transação]
-    L --> M[Painel recarrega saldos e extrato]
-```
+![Fluxograma de lançamento com validação, idempotência, transação no PostgreSQL e resposta ao painel](docs/lancamento.svg)
+
+[Código Mermaid do lançamento](docs/lancamento.mmd)
 
 **Concorrência.** O PostgreSQL bloqueia a linha do usuário durante a movimentação. Operações do mesmo usuário são serializadas, enquanto usuários diferentes podem escrever em paralelo. Uma transferência atualiza origem e destino e grava o lançamento em uma única transação. Se uma conta for inválida ou o saldo for insuficiente, a transação reverte todas as alterações.
 
@@ -43,15 +35,9 @@ flowchart TD
 
 ### Fluxograma de leitura do painel
 
-```mermaid
-flowchart LR
-    A[Painel autenticado] --> B[GET /auth/overview]
-    B --> C[Iniciar transação de leitura Repeatable Read]
-    C --> D[Consultar contas do usuário]
-    D --> E[Consultar os últimos 100 lançamentos]
-    E --> F[Responder com o mesmo snapshot]
-    F --> G[Renderizar saldos e extrato]
-```
+![Fluxograma de leitura de contas e extrato no mesmo snapshot do PostgreSQL](docs/leitura.svg)
+
+[Código Mermaid da leitura](docs/leitura.mmd)
 
 A leitura usa `REPEATABLE READ` para evitar combinar um saldo anterior à transação com um extrato posterior. O limite do extrato reduz o volume servido em cada atualização.
 
